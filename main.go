@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"sync/atomic"
 )
 
@@ -45,7 +46,7 @@ type chirp struct {
 }
 
 type validChirpResponse struct {
-	Valid bool `json:"valid"`
+	CleanedBody string `json:"cleaned_body"`
 }
 
 type errorChirpResponse struct {
@@ -62,6 +63,34 @@ func generateErrorResponse(msg ...string) []byte {
 
 	responseBody := errorChirpResponse{ErrorMsg: errormsg}
 	data, _ := json.Marshal(responseBody)
+	return data
+}
+
+var profaneWords = map[string]bool{"kerfuffle": true, "sharbert": true, "fornax": true}
+
+func FilterProfane(chirp string) string {
+	words := strings.Split(chirp, " ")
+	lowerChirp := strings.ToLower(chirp)
+	lowerWords := strings.Split(lowerChirp, " ")
+	for i, word := range lowerWords {
+		if profaneWords[word] {
+			words[i] = "****"
+		}
+	}
+	return strings.Join(words, " ")
+}
+
+func generateValidResponse(w http.ResponseWriter, chirp string) []byte {
+	filteredChirp := FilterProfane(chirp)
+	responseBody := validChirpResponse{CleanedBody: filteredChirp}
+	data, err := json.Marshal(responseBody)
+	if err != nil {
+		log.Printf("Error encoding response: %s", err)
+		w.WriteHeader(500)
+		w.Write(generateErrorResponse())
+		return nil
+	}
+
 	return data
 }
 
@@ -85,14 +114,7 @@ func chirpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseBody := validChirpResponse{Valid: true}
-	data, err := json.Marshal(responseBody)
-	if err != nil {
-		log.Printf("Error encoding response: %s", err)
-		w.WriteHeader(500)
-		w.Write(generateErrorResponse())
-		return
-	}
+	data := generateValidResponse(w, params.Body)
 
 	w.WriteHeader(200)
 	w.Write(data)
