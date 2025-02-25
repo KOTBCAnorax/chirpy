@@ -30,8 +30,7 @@ func (cfg *apiConfig) handleUserCreation(w http.ResponseWriter, r *http.Request)
 	err := decoder.Decode(&params)
 	if err != nil {
 		log.Printf("Error encoding response: %s", err)
-		w.WriteHeader(500)
-		w.Write(generateErrorResponse())
+		generateErrorResponse(w, 500)
 		return
 	}
 
@@ -42,8 +41,7 @@ func (cfg *apiConfig) handleUserCreation(w http.ResponseWriter, r *http.Request)
 	user, err := cfg.db.CreateUser(r.Context(), email)
 	if err != nil {
 		fmt.Printf("Database error: %v\n", err)
-		w.WriteHeader(500)
-		w.Write(generateErrorResponse("--->Couldn't create user\n"))
+		generateErrorResponse(w, 500, "Couldn't create user")
 		return
 	}
 
@@ -57,8 +55,7 @@ func (cfg *apiConfig) handleUserCreation(w http.ResponseWriter, r *http.Request)
 	data, err := json.Marshal(responseBody)
 	if err != nil {
 		log.Printf("Error encoding response: %s", err)
-		w.WriteHeader(500)
-		w.Write(generateErrorResponse())
+		generateErrorResponse(w, 500)
 		return
 	}
 
