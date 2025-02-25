@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -34,11 +33,7 @@ func (cfg *apiConfig) handleUserCreation(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	email := sql.NullString{
-		String: params.Email,
-		Valid:  true,
-	}
-	user, err := cfg.db.CreateUser(r.Context(), email)
+	user, err := cfg.db.CreateUser(r.Context(), params.Email)
 	if err != nil {
 		fmt.Printf("Database error: %v\n", err)
 		generateErrorResponse(w, 500, "Couldn't create user")
@@ -47,9 +42,9 @@ func (cfg *apiConfig) handleUserCreation(w http.ResponseWriter, r *http.Request)
 
 	responseBody := User{
 		ID:        user.ID,
-		CreatedAt: user.CreatedAt.Time,
-		UpdatedAt: user.UpdatedAt.Time,
-		Email:     user.Email.String,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+		Email:     user.Email,
 	}
 
 	data, err := json.Marshal(responseBody)
