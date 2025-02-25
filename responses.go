@@ -23,7 +23,7 @@ func generateErrorResponse(msg ...string) []byte {
 	if len(msg) > 0 {
 		errormsg = msg[0]
 	} else {
-		errormsg = "Something went wrong"
+		errormsg = "Something went wrong\n"
 	}
 
 	responseBody := errorChirpResponse{ErrorMsg: errormsg}
@@ -36,7 +36,7 @@ func generateValidResponse(w http.ResponseWriter, chirp string) []byte {
 	responseBody := validChirpResponse{CleanedBody: filteredChirp}
 	data, err := json.Marshal(responseBody)
 	if err != nil {
-		log.Printf("Error encoding response: %s", err)
+		log.Printf("Error encoding response: %s\n", err)
 		w.WriteHeader(500)
 		w.Write(generateErrorResponse())
 		return nil

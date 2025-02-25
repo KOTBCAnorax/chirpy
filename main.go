@@ -16,7 +16,8 @@ func main() {
 	dbURL := os.Getenv("DB_URL")
 	db, _ := sql.Open("postgres", dbURL)
 	dbQueries := database.New(db)
-	var apiCfg = apiConfig{dbQUeries: dbQueries}
+	platform := os.Getenv("PLATFORM")
+	var apiCfg = apiConfig{db: dbQueries, platform: platform}
 
 	const filePathRoot = "."
 	const port = "8080"
@@ -26,8 +27,9 @@ func main() {
 
 	mux.HandleFunc("GET /api/healthz", handlerReadiness)
 	mux.HandleFunc("GET /admin/metrics", apiCfg.numberOfHits)
-	mux.HandleFunc("POST /admin/reset", apiCfg.resetNumberOfHits)
+	mux.HandleFunc("POST /admin/reset", apiCfg.handleReset)
 	mux.HandleFunc("POST /api/validate_chirp", chirpHandler)
+	mux.HandleFunc("POST /api/users", apiCfg.handleUserCreation)
 
 	srv := &http.Server{
 		Handler: mux,

@@ -1,6 +1,6 @@
 -- +goose Up
 CREATE TABLE users(
-    id INTEGER PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
     email TEXT
