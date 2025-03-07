@@ -28,7 +28,7 @@ func (cfg *apiConfig) handleUserCreation(w http.ResponseWriter, r *http.Request)
 	params := UserEmail{}
 	err := decoder.Decode(&params)
 	if err != nil {
-		log.Printf("Error encoding response: %s", err)
+		log.Printf("Error decoding request: %s\n", err)
 		generateErrorResponse(w, 500)
 		return
 	}
@@ -49,7 +49,7 @@ func (cfg *apiConfig) handleUserCreation(w http.ResponseWriter, r *http.Request)
 
 	data, err := json.Marshal(responseBody)
 	if err != nil {
-		log.Printf("Error encoding response: %s", err)
+		log.Printf("Error encoding response: %s\n", err)
 		generateErrorResponse(w, 500)
 		return
 	}

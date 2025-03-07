@@ -30,6 +30,7 @@ func main() {
 	mux.HandleFunc("POST /admin/reset", apiCfg.handleReset)
 	mux.HandleFunc("POST /api/chirps", apiCfg.handleChirp)
 	mux.HandleFunc("POST /api/users", apiCfg.handleUserCreation)
+	mux.HandleFunc("GET /api/chirps", apiCfg.handleListChirps)
 
 	srv := &http.Server{
 		Handler: mux,
