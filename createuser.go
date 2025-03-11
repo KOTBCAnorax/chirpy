@@ -7,11 +7,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/KOTBCAnorax/chirpy/internal/auth"
+	"github.com/KOTBCAnorax/chirpy/internal/database"
 	"github.com/google/uuid"
 )
 
-type UserEmail struct {
-	Email string `json:"email"`
+type ReqUser struct {
+	Password string `json:"password"`
+	Email    string `json:"email"`
 }
 
 type User struct {
@@ -25,7 +28,7 @@ func (cfg *apiConfig) handleUserCreation(w http.ResponseWriter, r *http.Request)
 	w.Header().Set("Content-type", "application/json")
 
 	decoder := json.NewDecoder(r.Body)
-	params := UserEmail{}
+	params := ReqUser{}
 	err := decoder.Decode(&params)
 	if err != nil {
 		log.Printf("Error decoding request: %s\n", err)
@@ -33,7 +36,19 @@ func (cfg *apiConfig) handleUserCreation(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	user, err := cfg.db.CreateUser(r.Context(), params.Email)
+	hashedPassword, err := auth.HashPassword(params.Password)
+	if err != nil {
+		log.Printf("Error hashing provided password: %s\n", err)
+		generateErrorResponse(w, 500)
+		return
+	}
+
+	newDbEntry := database.CreateUserParams{
+		HashedPassword: hashedPassword,
+		Email:          params.Email,
+	}
+
+	user, err := cfg.db.CreateUser(r.Context(), newDbEntry)
 	if err != nil {
 		fmt.Printf("Database error: %v\n", err)
 		generateErrorResponse(w, 500, "Couldn't create user")
