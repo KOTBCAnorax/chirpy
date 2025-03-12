@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/KOTBCAnorax/chirpy/internal/auth"
 	"github.com/KOTBCAnorax/chirpy/internal/database"
 	"github.com/google/uuid"
 )
@@ -35,6 +36,20 @@ func (cfg *apiConfig) handleChirp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		log.Printf("Error getting bearer token: %v\n", err)
+		generateErrorResponse(w, 401, "Unauthorized")
+		return
+	}
+
+	userID, err := auth.ValidateJWT(token, cfg.secret)
+	if err != nil {
+		log.Printf("Invalid token: %v\n", err)
+		generateErrorResponse(w, 401, "Unauthorized")
+		return
+	}
+
 	if len(reqParams.Body) > 140 {
 		msg := "Chirp is too long"
 		log.Println(msg)
@@ -43,13 +58,6 @@ func (cfg *apiConfig) handleChirp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reqParams.Body = FilterProfane(reqParams.Body)
-	userID, err := uuid.Parse(reqParams.UserID)
-	if err != nil {
-		log.Printf("Failed to parse user id: %v\n", err)
-		generateErrorResponse(w, 500)
-		return
-	}
-
 	parsedParams := database.CreateChirpParams{
 		Body:   reqParams.Body,
 		UserID: userID,

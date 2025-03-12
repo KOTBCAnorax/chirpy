@@ -17,7 +17,8 @@ func main() {
 	db, _ := sql.Open("postgres", dbURL)
 	dbQueries := database.New(db)
 	platform := os.Getenv("PLATFORM")
-	var apiCfg = apiConfig{db: dbQueries, platform: platform}
+	scrt := os.Getenv("SCRT")
+	var apiCfg = apiConfig{db: dbQueries, platform: platform, secret: scrt}
 
 	const filePathRoot = "."
 	const port = "8080"
@@ -32,7 +33,7 @@ func main() {
 	mux.HandleFunc("POST /api/users", apiCfg.handleUserCreation)
 	mux.HandleFunc("GET /api/chirps", apiCfg.handleListChirps)
 	mux.HandleFunc("GET /api/chirps/{chirpID}", apiCfg.handleGetChirp)
-	mux.HandleFunc("POST /api/login", apiCfg.HandleLogin)
+	mux.HandleFunc("POST /api/login", apiCfg.handleLogin)
 
 	srv := &http.Server{
 		Handler: mux,

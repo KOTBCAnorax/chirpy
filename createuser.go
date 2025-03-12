@@ -13,8 +13,9 @@ import (
 )
 
 type ReqUser struct {
-	Password string `json:"password"`
-	Email    string `json:"email"`
+	Password         string `json:"password"`
+	Email            string `json:"email"`
+	ExpiresInSeconds int    `json:"expires_in_seconds"`
 }
 
 type User struct {
@@ -22,6 +23,7 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Email     string    `json:"email"`
+	Token     string    `json:"token"`
 }
 
 func (cfg *apiConfig) handleUserCreation(w http.ResponseWriter, r *http.Request) {

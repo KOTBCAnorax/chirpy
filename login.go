@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/KOTBCAnorax/chirpy/internal/auth"
 )
 
-func (cfg *apiConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
+func (cfg *apiConfig) handleLogin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 
 	decoder := json.NewDecoder(r.Body)
@@ -41,11 +42,24 @@ func (cfg *apiConfig) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	expiresIn := params.ExpiresInSeconds
+	if expiresIn <= 0 || expiresIn > 3600 {
+		expiresIn = 3600
+	}
+
+	token, err := auth.MakeJWT(user.ID, cfg.secret, time.Duration(expiresIn)*time.Second)
+	if err != nil {
+		log.Printf("Token generation failed: %v\n", err)
+		generateErrorResponse(w, 500, "Server error")
+		return
+	}
+
 	responseBody := User{
 		ID:        user.ID,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 		Email:     user.Email,
+		Token:     token,
 	}
 
 	data, err := json.Marshal(responseBody)
