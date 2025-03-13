@@ -15,9 +15,20 @@ CREATE TABLE chirps(
     CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE refresh_tokens(
+    token TEXT PRIMARY KEY,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    user_id UUID NOT NULL,
+    CONSTRAINT fk_user FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+    expires_at TIMESTAMP NOT NULL,
+    revoked_at TIMESTAMP DEFAULT NULL
+);
+
 ALTER TABLE users
 ADD COLUMN hashed_password TEXT NOT NULL DEFAULT 'unset';
 
 -- +goose Down
 DROP TABLE chirps;
+DROP TABLE refresh_tokens;
 DROP TABLE users;
