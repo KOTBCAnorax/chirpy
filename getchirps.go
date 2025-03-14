@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/KOTBCAnorax/chirpy/internal/database"
 	"github.com/google/uuid"
 )
 
@@ -52,7 +53,21 @@ func (cfg *apiConfig) handleGetChirp(w http.ResponseWriter, r *http.Request) {
 func (cfg *apiConfig) handleListChirps(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 
-	chirpsList, err := cfg.db.ListChirps(r.Context())
+	userIDStr := r.URL.Query().Get("author_id")
+
+	var chirpsList []database.Chirp
+	var err error
+
+	if userIDStr == "" {
+		chirpsList, err = cfg.db.ListChirps(r.Context())
+	} else {
+		var userID uuid.UUID
+		userID, err = uuid.Parse(userIDStr)
+		if err == nil {
+			chirpsList, err = cfg.db.ListUserChirps(r.Context(), userID)
+		}
+	}
+
 	if err != nil {
 		log.Printf("Error retrieving chirps: %s\n", err)
 		generateErrorResponse(w, 500)
