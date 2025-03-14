@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/KOTBCAnorax/chirpy/internal/auth"
 	"github.com/google/uuid"
 )
 
@@ -24,9 +25,22 @@ type UpgradeResponse struct {
 func (cfg *apiConfig) handleUpgrade(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 
+	requestApiKey, err := auth.GetAPIKey(r.Header)
+	if err != nil {
+		log.Printf("Error getting api key: %v\n", err)
+		generateErrorResponse(w, 401)
+		return
+	}
+
+	if requestApiKey != cfg.polkaKey {
+		log.Printf("Api key mismatch\n")
+		generateErrorResponse(w, 401)
+		return
+	}
+
 	decoder := json.NewDecoder(r.Body)
 	params := UpgradeRequest{}
-	err := decoder.Decode(&params)
+	err = decoder.Decode(&params)
 	if err != nil {
 		log.Printf("Error decoding upgrade request: %v\n", err)
 		generateErrorResponse(w, 500)

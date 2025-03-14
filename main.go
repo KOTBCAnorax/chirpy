@@ -18,7 +18,8 @@ func main() {
 	dbQueries := database.New(db)
 	platform := os.Getenv("PLATFORM")
 	scrt := os.Getenv("SCRT")
-	var apiCfg = apiConfig{db: dbQueries, platform: platform, secret: scrt}
+	polkaKey := os.Getenv("POLKA_KEY")
+	var apiCfg = apiConfig{db: dbQueries, platform: platform, secret: scrt, polkaKey: polkaKey}
 
 	const filePathRoot = "."
 	const port = "8080"
