@@ -33,7 +33,7 @@ func (q *Queries) FindRefreshToken(ctx context.Context, token string) (RefreshTo
 }
 
 const findUserByRefreshToken = `-- name: FindUserByRefreshToken :one
-SELECT id, created_at, updated_at, email, hashed_password FROM users
+SELECT id, created_at, updated_at, email, hashed_password, is_chirpy_red FROM users
 WHERE id = (
     SELECT user_id FROM refresh_tokens
     WHERE token = $1 AND expires_at > $2 AND revoked_at IS NULL
@@ -54,6 +54,7 @@ func (q *Queries) FindUserByRefreshToken(ctx context.Context, arg FindUserByRefr
 		&i.UpdatedAt,
 		&i.Email,
 		&i.HashedPassword,
+		&i.IsChirpyRed,
 	)
 	return i, err
 }
