@@ -127,8 +127,8 @@ func (cfg *apiConfig) handleRefresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	searchParams := database.FindUserByRefreshTokenParams{
-		Token:       dbToken.Token,
-		CurrentTime: time.Now(),
+		Token:     dbToken.Token,
+		ExpiresAt: time.Now(),
 	}
 	user, err := cfg.db.FindUserByRefreshToken(r.Context(), searchParams)
 	if err != nil {

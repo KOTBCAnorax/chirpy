@@ -41,12 +41,12 @@ WHERE id = (
 `
 
 type FindUserByRefreshTokenParams struct {
-	Token     	string
-	CurrentTime time.Time
+	Token     string
+	ExpiresAt time.Time
 }
 
 func (q *Queries) FindUserByRefreshToken(ctx context.Context, arg FindUserByRefreshTokenParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, findUserByRefreshToken, arg.Token, arg.CurrentTime)
+	row := q.db.QueryRowContext(ctx, findUserByRefreshToken, arg.Token, arg.ExpiresAt)
 	var i User
 	err := row.Scan(
 		&i.ID,
