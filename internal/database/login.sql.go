@@ -7,8 +7,8 @@ package database
 
 import (
 	"context"
-	"time"
 	"database/sql"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -109,4 +109,3 @@ func (q *Queries) RevokeRefreshToken(ctx context.Context, token string) (RevokeR
 	err := row.Scan(&i.Token, &i.RevokedAt)
 	return i, err
 }
-
