@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"sort"
+	"strings"
 
 	"github.com/KOTBCAnorax/chirpy/internal/database"
 	"github.com/google/uuid"
@@ -54,6 +56,10 @@ func (cfg *apiConfig) handleListChirps(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/json")
 
 	userIDStr := r.URL.Query().Get("author_id")
+	sortOrder := strings.ToLower(r.URL.Query().Get("sort"))
+	if sortOrder != "desc" {
+		sortOrder = "asc"
+	}
 
 	var chirpsList []database.Chirp
 	var err error
@@ -83,6 +89,16 @@ func (cfg *apiConfig) handleListChirps(w http.ResponseWriter, r *http.Request) {
 			Body:      chirp.Body,
 			UserID:    chirp.UserID,
 		}
+	}
+
+	if sortOrder == "asc" {
+		sort.Slice(responseList, func(i, j int) bool {
+			return responseList[i].CreatedAt.Before(responseList[j].CreatedAt)
+		})
+	} else {
+		sort.Slice(responseList, func(i, j int) bool {
+			return responseList[i].CreatedAt.After(responseList[j].CreatedAt)
+		})
 	}
 
 	data, err := json.Marshal(responseList)
